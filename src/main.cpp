@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
-const char* WIFI_SSID = "WiFi_Undiknas 3D";
-const char* WIFI_PASS = "";
-const char* HOSTNAME = "FTI";
+const char* WIFI_SSID = "FTI";
+const char* WIFI_PASS = "teknikpastijaya";
+const char* HOSTNAME = "DANA";
 
 void setup()
 {
@@ -25,6 +25,4 @@ void setup()
 
 void loop()
 {
-  Serial.println("Hello Yudiarsana");
-  delay(1000);
 }

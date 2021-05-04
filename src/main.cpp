@@ -46,6 +46,7 @@ void setup()
   }
   Serial.println("");
   Serial.println("WiFi connected successfully.");
+  sensors.begin();
 }
 
 void loop()

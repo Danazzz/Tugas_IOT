@@ -52,4 +52,6 @@ void setup()
 
 void loop()
 {
+  float suhu = getAmbientTemperature();
+  delay(3000);
 }

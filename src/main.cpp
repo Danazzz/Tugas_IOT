@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 const char* WIFI_SSID = "FTI";
 const char* WIFI_PASS = "teknikpastijaya";

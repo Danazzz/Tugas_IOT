@@ -1,40 +1,56 @@
+//include library yang diperlukan
 #include <Arduino.h>
 #include <WiFi.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+// sensor  ds18b20 disambungkan di pin 4
+#define ONE_WIRE_BUS 4
+
+//menggunakan wifi-tethering
 const char* WIFI_SSID = "FTI";
 const char* WIFI_PASS = "teknikpastijaya";
 const char* HOSTNAME = "DANA";
 
-OneWire oneWire(4);
+//berikan nama variabel untuk syntax onewire dan dallastemperature
+OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
-float getAmbientTemperature()
-{
+//function untuk membaca temperature suhu
+float getAmbientTemperature(){
   Serial.print("Requesting temperatures...");
   sensors.requestTemperatures();
   Serial.println("DONE");
 
-  float tempC = sensors.getTempCByIndex(0);
+  float tempC = sensors.getTempCByIndex(0); //temperatur celcius
+  float tempF = sensors.getTempFByIndex(0);//temperatur farenheit
 
-  if(tempC != DEVICE_DISCONNECTED_C) 
-  {
-    Serial.print("Temperature for the device 1 (index 0) is: ");
-    Serial.println(tempC);
-    return tempC;
+  //if else statement
+  if(tempF != DEVICE_DISCONNECTED_F){
+    if(tempC != DEVICE_DISCONNECTED_C){
+      Serial.print("Celcius temperature for the device 1 (index 0) is: ");
+      Serial.println(tempC);
+    }
+    else{
+      Serial.println("Error: Could not read temperature data");
+      return -127;
+    }
+    Serial.print("Fahrenheit temperature for the device 1 (index 0) is: ");
+    Serial.println(tempF);
+    return tempF;
   } 
-  else
-  {
+  else{
     Serial.println("Error: Could not read temperature data");
-    return -127;
+    return -196.6;
   }
 }
 
 void setup()
 {
+  //menjalankan serial monitor
   Serial.begin(115200);
 
+  //koneksi ke Wifi
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   WiFi.setHostname(HOSTNAME);
@@ -46,11 +62,14 @@ void setup()
   }
   Serial.println("");
   Serial.println("WiFi connected successfully.");
-  sensors.begin();
+
+  Serial.println("--DS18B20 Demo--");
+  sensors.begin(); //menjalankan sensor
 }
 
 void loop()
 {
-  float suhu = getAmbientTemperature();
-  delay(3000);
+  //menjalankan function getAmbientTemperature()
+  getAmbientTemperature();
+  delay(5000);
 }

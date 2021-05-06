@@ -23,14 +23,25 @@ float getAmbientTemperature(){
   Serial.println("DONE");
 
   float tempC = sensors.getTempCByIndex(0); //temperatur celcius
-  if(tempC != DEVICE_DISCONNECTED_C){
-    Serial.print("Temperature for the device 1 (index 0) is: ");
-    Serial.println(tempC);
-    return tempC;
+  float tempF = sensors.getTempFByIndex(0);//temperatur farenheit
+
+  //if else statement
+  if(tempF != DEVICE_DISCONNECTED_F){
+    if(tempC != DEVICE_DISCONNECTED_C){
+      Serial.print("Celcius temperature for the device 1 (index 0) is: ");
+      Serial.println(tempC);
+    }
+    else{
+      Serial.println("Error: Could not read temperature data");
+      return -127;
+    }
+    Serial.print("Fahrenheit temperature for the device 1 (index 0) is: ");
+    Serial.println(tempF);
+    return tempF;
   } 
   else{
     Serial.println("Error: Could not read temperature data");
-    return -127;
+    return -196.6;
   }
 }
 
@@ -52,12 +63,13 @@ void setup()
   Serial.println("");
   Serial.println("WiFi connected successfully.");
 
+  Serial.println("--DS18B20 Demo--");
   sensors.begin(); //menjalankan sensor
 }
 
 void loop()
 {
   //menjalankan function getAmbientTemperature()
-  float suhu = getAmbientTemperature();
+  getAmbientTemperature();
   delay(5000);
 }

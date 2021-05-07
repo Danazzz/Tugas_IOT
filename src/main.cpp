@@ -29,14 +29,16 @@ float getAmbientTemperature(){
   if(tempF != DEVICE_DISCONNECTED_F){
     if(tempC != DEVICE_DISCONNECTED_C){
       Serial.print("Celcius temperature for the device 1 (index 0) is: ");
-      Serial.println(tempC);
+      Serial.print(tempC);
+      Serial.println("°C");
     }
     else{
       Serial.println("Error: Could not read temperature data");
       return -127;
     }
     Serial.print("Fahrenheit temperature for the device 1 (index 0) is: ");
-    Serial.println(tempF);
+    Serial.print(tempF);
+    Serial.println("°F");
     return tempF;
   } 
   else{

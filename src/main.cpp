@@ -3,7 +3,7 @@
 #include <WiFi.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-
+#include <MQTT.h>
 // sensor  ds18b20 disambungkan di pin 4
 #define ONE_WIRE_BUS 4
 
@@ -11,10 +11,15 @@
 const char* WIFI_SSID = "FTI";
 const char* WIFI_PASS = "teknikpastijaya";
 const char* HOSTNAME = "DANA";
+const char* IOTBROKER = "broker.hivemq.com";
 
 //berikan nama variabel untuk syntax onewire dan dallastemperature
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
+
+//wifi dan MQTT client
+WiFiClient net;
+MQTTClient iot;
 
 //function untuk membaca temperature suhu
 float getAmbientTemperature(){
@@ -67,6 +72,8 @@ void setup()
 
   Serial.println("--DS18B20 Demo--");
   sensors.begin(); //menjalankan sensor
+
+  iot.begin(IOTBROKER, net);
 }
 
 void loop()

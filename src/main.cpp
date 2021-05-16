@@ -4,6 +4,7 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <MQTT.h>
+
 // sensor  ds18b20 disambungkan di pin 4
 #define ONE_WIRE_BUS 4
 
@@ -74,6 +75,7 @@ void setup()
   sensors.begin(); //menjalankan sensor
 
   iot.begin(IOTBROKER, net);
+  iot.onMessage(messageReceived);
 }
 
 void loop()

@@ -55,7 +55,7 @@ float getAmbientTemperature(){
   }
 }
 
-//fungsi set relay
+//fungsi setrelay
 void setRelay(bool state)
 {
   // lakukan tugas pinMode dan digitalWrite
@@ -66,7 +66,7 @@ void setRelay(bool state)
   Serial.println();
 }
 
-//fungsi get relay
+//fungsi getrelay
 bool getRelay()
 {
   bool state = digitalRead(RELAY);
@@ -75,7 +75,7 @@ bool getRelay()
   Serial.println();
   return state;
 }
-
+//fungsi messageReceived
 void messageReceived(String &topic, String &payload){
   Serial.println("Incoming : " + topic + " - " +payload);
 }
@@ -105,6 +105,14 @@ void setup(){
 
   iot.begin(IOTBROKER, net);
   iot.onMessage(messageReceived);
+
+  Serial.print("Connecting to IoT Broker");
+  while (iot.connect("ESP32", "public", "public")){
+    Serial.print(".");
+    delay(1000);
+  }
+  Serial.println("");
+  Serial.println("IoT Broker connected successfully.");
 }
 
 void loop(){

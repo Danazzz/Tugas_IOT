@@ -6,6 +6,8 @@
 
 // sensor  ds18b20 disambungkan di pin 4
 #define ONE_WIRE_BUS 4
+//pin 32 yang akan digunakan sebagai TRIG pin
+#define RELAY 32
 
 //menggunakan wifi-tethering
 const char* WIFI_SSID = "FTI";
@@ -47,10 +49,32 @@ float getAmbientTemperature(){
   }
 }
 
+void setRelay(bool state)
+{
+  // lakukan tugas pinMode dan digitalWrite
+  pinMode(RELAY, OUTPUT);
+  digitalWrite(RELAY, state);
+  Serial.print("Relay state changed to : ");
+  Serial.print(state);
+  Serial.println();
+}
+
+bool getRelay()
+{
+  bool state = digitalRead(RELAY);
+  Serial.print("Relay state is : ");
+  Serial.print(state);
+  Serial.println();
+  return state;
+}
+
 void setup()
 {
   //menjalankan serial monitor
   Serial.begin(115200);
+
+  //pinmode relay
+  pinMode(RELAY, OUTPUT);
 
   //koneksi ke Wifi
   WiFi.mode(WIFI_STA);

@@ -7,7 +7,7 @@
 
 // sensor  ds18b20 disambungkan di pin 4
 #define ONE_WIRE_BUS 4
-//pin 32 yang akan digunakan sebagai TRIG pin
+//pin 32 yang akan digunakan sebagai TRIG pin ke relay
 #define RELAY 32
 
 //menggunakan wifi-tethering
@@ -16,7 +16,7 @@ const char* WIFI_PASS = "teknikpastijaya";
 const char* HOSTNAME = "DANA";
 const char* IOTBROKER = "broker.hivemq.com";
 
-//berikan nama variabel untuk syntax onewire dan dallastemperature
+//variabel untuk syntax onewire dan dallastemperature
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
@@ -55,7 +55,7 @@ float getAmbientTemperature(){
   }
 }
 
-//fungsi setrelay
+//fungsi untuk set relay
 void setRelay(bool state)
 {
   // lakukan tugas pinMode dan digitalWrite
@@ -66,7 +66,7 @@ void setRelay(bool state)
   Serial.println();
 }
 
-//fungsi getrelay
+//fungsi untuk get relay
 bool getRelay()
 {
   bool state = digitalRead(RELAY);
@@ -75,7 +75,7 @@ bool getRelay()
   Serial.println();
   return state;
 }
-//fungsi messageReceived
+//fungsi menampilkan topic dan payload
 void messageReceived(String &topic, String &payload){
   Serial.println("Incoming : " + topic + " - " +payload);
 }
@@ -100,9 +100,11 @@ void setup(){
   Serial.println("");
   Serial.println("WiFi connected successfully.");
 
+  //menjalankan sensor
   Serial.println("--DS18B20 Demo--");
-  sensors.begin(); //menjalankan sensor
+  sensors.begin();
 
+  //koneksi ke IoT Broker
   iot.begin(IOTBROKER, net);
   iot.onMessage(messageReceived);
 
@@ -113,6 +115,9 @@ void setup(){
   }
   Serial.println("");
   Serial.println("IoT Broker connected successfully.");
+  
+  iot.subscribe("undiknas/ti/kelompok7/relay");
+  iot.subscribe("undiknas/ti/+/chatroom");
 }
 
 void loop(){

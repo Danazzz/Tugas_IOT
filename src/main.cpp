@@ -55,6 +55,7 @@ float getAmbientTemperature(){
   }
 }
 
+//fungsi set relay
 void setRelay(bool state)
 {
   // lakukan tugas pinMode dan digitalWrite
@@ -65,6 +66,7 @@ void setRelay(bool state)
   Serial.println();
 }
 
+//fungsi get relay
 bool getRelay()
 {
   bool state = digitalRead(RELAY);
@@ -74,8 +76,11 @@ bool getRelay()
   return state;
 }
 
-void setup()
-{
+void messageReceived(String &topic, String &payload){
+  Serial.println("Incoming : " + topic + " - " +payload);
+}
+
+void setup(){
   //menjalankan serial monitor
   Serial.begin(115200);
 
@@ -102,8 +107,7 @@ void setup()
   iot.onMessage(messageReceived);
 }
 
-void loop()
-{
+void loop(){
   //menjalankan function getAmbientTemperature()
   getAmbientTemperature();
   delay(5000);

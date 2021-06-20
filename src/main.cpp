@@ -1,127 +1,173 @@
-//include library yang diperlukan
 #include <Arduino.h>
 #include <WiFi.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <MQTT.h>
 
-// sensor  ds18b20 disambungkan di pin 4
-#define ONE_WIRE_BUS 4
-//pin 32 yang akan digunakan sebagai TRIG pin ke relay
-#define RELAY 32
 
-//menggunakan wifi-tethering
 const char* WIFI_SSID = "FTI";
 const char* WIFI_PASS = "teknikpastijaya";
-const char* HOSTNAME = "DANA";
+const char* HOSTNAME = "KELOMPOK7";
 const char* IOTBROKER = "broker.hivemq.com";
+#define PIN_RELAY 32
 
-//variabel untuk syntax onewire dan dallastemperature
-OneWire oneWire(ONE_WIRE_BUS);
+
+OneWire oneWire(4);
 DallasTemperature sensors(&oneWire);
-
-//wifi dan MQTT client
 WiFiClient net;
 MQTTClient iot;
 
-//function untuk membaca temperature suhu
-float getAmbientTemperature(){
+
+float getAmbientTemperature()
+{
   Serial.print("Requesting temperatures...");
   sensors.requestTemperatures();
   Serial.println("DONE");
 
-  float tempC = sensors.getTempCByIndex(0); //temperatur celcius
-  float tempF = sensors.getTempFByIndex(0);//temperatur farenheit
 
-  //if else statement
-  if(tempF != DEVICE_DISCONNECTED_F){
-    if(tempC != DEVICE_DISCONNECTED_C){
-      Serial.print("Celcius temperature for the device 1 (index 0) is: ");
-      Serial.print(tempC);
-      Serial.println("°C");
-    }
-    else{
-      Serial.println("Error: Could not read temperature data");
-      return -127;
-    }
-    Serial.print("Fahrenheit temperature for the device 1 (index 0) is: ");
-    Serial.print(tempF);
-    Serial.println("°F");
-    return tempF;
+  float tempC = sensors.getTempCByIndex(0);
+
+
+  if(tempC != DEVICE_DISCONNECTED_C) 
+  {
+    Serial.print("Temperature for the device 1 (index 0) is: ");
+    Serial.println(tempC);
+    return tempC;
   } 
-  else{
+  else
+  {
     Serial.println("Error: Could not read temperature data");
-    return -196.6;
+    return -127;
   }
 }
 
-//fungsi untuk set relay
+
 void setRelay(bool state)
 {
-  // lakukan tugas pinMode dan digitalWrite
-  pinMode(RELAY, OUTPUT);
-  digitalWrite(RELAY, state);
-  Serial.print("Relay state changed to : ");
+  digitalWrite(PIN_RELAY, state);
+  Serial.print("Relay state changed to: ");
   Serial.print(state);
   Serial.println();
 }
 
-//fungsi untuk get relay
+
 bool getRelay()
 {
-  bool state = digitalRead(RELAY);
-  Serial.print("Relay state is : ");
+  bool state = digitalRead(PIN_RELAY);
+  Serial.print("Relay state is: ");
   Serial.print(state);
   Serial.println();
   return state;
 }
-//fungsi menampilkan topic dan payload
-void messageReceived(String &topic, String &payload){
-  Serial.println("Incoming : " + topic + " - " +payload);
+
+
+void messageReceived(String &topic, String &payload)
+{
+  Serial.println("Incomming: " + topic + " - " + payload);
+
+
+  if(topic == "undiknas/ti/kelompok7/relay")
+  {
+    if(payload == "on")
+    {
+      setRelay(1);
+    }
+    else
+    {
+      setRelay(0);
+    }
+  }
 }
 
-void setup(){
-  //menjalankan serial monitor
+
+void iotConnect()
+{
+  Serial.print("Checking WiFi");
+  while(WiFi.status() != WL_CONNECTED) 
+  {
+    Serial.print(".");
+    delay(1000);
+  }
+  Serial.println("");
+
+
+  Serial.print("Connecting to IoT Broker");
+  while(!iot.connect("ESP32", "public", "public")) 
+  {
+    Serial.print(".");
+    delay(1000);
+  }
+  Serial.println("");
+  Serial.println("IoT broker connected successfully.");
+}
+
+
+void setup() {
   Serial.begin(115200);
+  pinMode(PIN_RELAY, OUTPUT);
 
-  //pinmode relay
-  pinMode(RELAY, OUTPUT);
 
-  //koneksi ke Wifi
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   WiFi.setHostname(HOSTNAME);
-
+  
   Serial.print("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED){
+  while(WiFi.status() != WL_CONNECTED) 
+  {
     Serial.print(".");
     delay(1000);
   }
   Serial.println("");
   Serial.println("WiFi connected successfully.");
 
-  //menjalankan sensor
-  Serial.println("--DS18B20 Demo--");
+
   sensors.begin();
 
-  //koneksi ke IoT Broker
+
   iot.begin(IOTBROKER, net);
   iot.onMessage(messageReceived);
-
-  Serial.print("Connecting to IoT Broker");
-  while (iot.connect("ESP32", "public", "public")){
-    Serial.print(".");
-    delay(1000);
-  }
-  Serial.println("");
-  Serial.println("IoT Broker connected successfully.");
-  
+  iotConnect();
   iot.subscribe("undiknas/ti/kelompok7/relay");
   iot.subscribe("undiknas/ti/+/chatroom");
 }
 
-void loop(){
-  //menjalankan function getAmbientTemperature()
-  getAmbientTemperature();
-  delay(5000);
+
+unsigned long intervalCounterRelay = 0;
+unsigned long intervalCounterSensor = 0;
+unsigned long intervalCounterIoTConnect = 0;
+void loop() {
+  unsigned long now = millis();
+  // put your main code here, to run repeatedly:
+  if((now - intervalCounterIoTConnect) > 10000)
+  {
+    {
+      if(!iot.connected())
+      {
+        iotConnect(); 
+      }
+      intervalCounterIoTConnect = now;
+    }
+  }
+
+
+  if( (now - intervalCounterRelay) > 1000)
+  {
+    intervalCounterRelay = now;
+
+
+    bool relayState = getRelay();
+    iot.publish("undiknas/ti/kelompok7/relay/state", String(relayState));
+  }
+
+
+  if( (now - intervalCounterSensor) > 5000)
+  {
+    intervalCounterSensor = now;
+
+
+    float suhu = getAmbientTemperature();
+    iot.publish("undiknas/ti/kelompok7/sensor/suhu", String(suhu));
+  } 
+  
+  iot.loop();
 }
